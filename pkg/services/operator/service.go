@@ -7,9 +7,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
-	"github.com/storacha/forgectl/pkg/services/chain"
-	"github.com/storacha/forgectl/pkg/services/inspector"
-	"github.com/storacha/forgectl/pkg/services/types"
+	"github.com/fil-forge/forgectl/pkg/services/chain"
+	"github.com/fil-forge/forgectl/pkg/services/inspector"
+	"github.com/fil-forge/forgectl/pkg/services/types"
 )
 
 type Service struct {

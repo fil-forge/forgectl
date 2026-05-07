@@ -7,7 +7,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/storacha/forgectl/pkg/services/types"
+	"github.com/fil-forge/forgectl/pkg/services/types"
 )
 
 // ListProviders queries all registered service providers

@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/storacha/forgectl/cli/cmd/metrics"
-	"github.com/storacha/forgectl/cli/cmd/payments"
-	"github.com/storacha/forgectl/cli/cmd/providers"
+	"github.com/fil-forge/forgectl/cli/cmd/metrics"
+	"github.com/fil-forge/forgectl/cli/cmd/payments"
+	"github.com/fil-forge/forgectl/cli/cmd/providers"
 )
 
 var cfgFile string

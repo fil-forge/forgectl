@@ -6,7 +6,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/storacha/forgectl/cli/cmd"
+	"github.com/fil-forge/forgectl/cli/cmd"
 )
 
 func main() {

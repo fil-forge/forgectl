@@ -13,7 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	logging "github.com/ipfs/go-log/v2"
-	"github.com/storacha/filecoin-services/go/bindings"
+	"github.com/fil-forge/filecoin-services/go/bindings"
 )
 
 var log = logging.Logger("service/inspector")

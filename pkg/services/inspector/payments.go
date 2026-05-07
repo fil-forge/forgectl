@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/storacha/forgectl/pkg/services/types"
+	"github.com/fil-forge/forgectl/pkg/services/types"
 )
 
 const (
@@ -71,12 +71,12 @@ func (s *Service) PaymentsStatus(ctx context.Context, tokenAddr, payer common.Ad
 
 	grpInit.Go(func() error {
 		bindCtx := &bind.CallOpts{Context: gctxInit}
-		mpp, err := s.ServiceViewContract.GetMaxProvingPeriod(bindCtx)
+		pdpConfig, err := s.ServiceViewContract.GetPDPConfig(bindCtx)
 		if err != nil {
 			log.Warnw("failed to get max proving period", "error", err)
 			maxProvingPeriod = 2880 // default fallback
 		} else {
-			maxProvingPeriod = mpp
+			maxProvingPeriod = pdpConfig.MaxProvingPeriod
 		}
 		return nil
 	})
@@ -752,8 +752,8 @@ func (s *Service) getRailProvingState(ctx context.Context, railId *big.Int) (*ra
 		return nil, fmt.Errorf("querying proving activation epoch: %w", err)
 	}
 
-	// 3. getMaxProvingPeriod()
-	maxProvingPeriod, err := s.ServiceViewContract.GetMaxProvingPeriod(bindCtx)
+	// 3. getPDPConfig()
+	pdpConfig, err := s.ServiceViewContract.GetPDPConfig(bindCtx)
 	if err != nil {
 		return nil, fmt.Errorf("querying max proving period: %w", err)
 	}
@@ -761,7 +761,7 @@ func (s *Service) getRailProvingState(ctx context.Context, railId *big.Int) (*ra
 	return &railProvingState{
 		DataSetId:        dataSetId,
 		ActivationEpoch:  activationEpoch,
-		MaxProvingPeriod: maxProvingPeriod,
+		MaxProvingPeriod: pdpConfig.MaxProvingPeriod,
 		HasValidator:     true,
 	}, nil
 }

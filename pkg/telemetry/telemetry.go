@@ -9,7 +9,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.26.0"
 
-	"github.com/storacha/forgectl/pkg/telemetry/metrics"
+	"github.com/fil-forge/forgectl/pkg/telemetry/metrics"
 )
 
 type shutdownFn func(context.Context) error

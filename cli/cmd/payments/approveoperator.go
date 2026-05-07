@@ -5,11 +5,11 @@ import (
 	"math/big"
 
 	"github.com/spf13/cobra"
-	"github.com/storacha/forgectl/cli/config"
-	"github.com/storacha/forgectl/cli/printer"
-	"github.com/storacha/forgectl/pkg/services/chain"
-	"github.com/storacha/forgectl/pkg/services/inspector"
-	payerservice "github.com/storacha/forgectl/pkg/services/payer"
+	"github.com/fil-forge/forgectl/cli/config"
+	"github.com/fil-forge/forgectl/cli/printer"
+	"github.com/fil-forge/forgectl/pkg/services/chain"
+	"github.com/fil-forge/forgectl/pkg/services/inspector"
+	payerservice "github.com/fil-forge/forgectl/pkg/services/payer"
 )
 
 var (
