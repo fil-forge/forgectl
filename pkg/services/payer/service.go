@@ -12,8 +12,8 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 
-	"github.com/storacha/forgectl/pkg/services/chain"
-	"github.com/storacha/forgectl/pkg/services/inspector"
+	"github.com/fil-forge/forgectl/pkg/services/chain"
+	"github.com/fil-forge/forgectl/pkg/services/inspector"
 )
 
 type Service struct {

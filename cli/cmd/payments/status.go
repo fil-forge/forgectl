@@ -14,10 +14,10 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 
-	"github.com/storacha/forgectl/cli/config"
-	"github.com/storacha/forgectl/cli/printer"
-	"github.com/storacha/forgectl/pkg/services/inspector"
-	"github.com/storacha/forgectl/pkg/services/types"
+	"github.com/fil-forge/forgectl/cli/config"
+	"github.com/fil-forge/forgectl/cli/printer"
+	"github.com/fil-forge/forgectl/pkg/services/inspector"
+	"github.com/fil-forge/forgectl/pkg/services/types"
 )
 
 var (
