@@ -66,9 +66,9 @@ type PayeeStatus struct {
 	Rails            []*RailStatus       `json:"rails"`
 
 	// Aggregated totals across all rails (using clear terminology)
-	TotalOwed       *big.Int `json:"totalOwed"`       // total accrued since last settlement (was TotalUnsettled)
-	TotalClaimable  *big.Int `json:"totalClaimable"`  // can settle now: funded + proven (was TotalActualSettleable)
-	TotalUnfunded   *big.Int `json:"totalUnfunded"`   // payer hasn't locked funds yet (Owed - Theoretical)
+	TotalOwed        *big.Int `json:"totalOwed"`        // total accrued since last settlement (was TotalUnsettled)
+	TotalClaimable   *big.Int `json:"totalClaimable"`   // can settle now: funded + proven (was TotalActualSettleable)
+	TotalUnfunded    *big.Int `json:"totalUnfunded"`    // payer hasn't locked funds yet (Owed - Theoretical)
 	TotalProofFaults *big.Int `json:"totalProofFaults"` // lost due to missed proofs (Theoretical - Claimable)
 
 	// Legacy fields for backwards compatibility (deprecated, use above)
