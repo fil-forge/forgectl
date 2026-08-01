@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/spf13/cobra"
 	"github.com/fil-forge/forgectl/cli/config"
 	"github.com/fil-forge/forgectl/cli/printer"
 	"github.com/fil-forge/forgectl/pkg/services/chain"
 	"github.com/fil-forge/forgectl/pkg/services/inspector"
 	"github.com/fil-forge/forgectl/pkg/services/operator"
+	"github.com/spf13/cobra"
 )
 
 var approveCmd = &cobra.Command{

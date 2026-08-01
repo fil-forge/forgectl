@@ -209,11 +209,6 @@ func (s *Service) PaymentsStatus(ctx context.Context, tokenAddr, payer common.Ad
 	}
 
 	// 7. Calculate derived values for each rail in parallel
-	type railStatusResult struct {
-		index  int
-		status *types.RailStatus
-	}
-
 	// Flatten all rails for parallel processing
 	type railJob struct {
 		payeeAddr common.Address
@@ -449,120 +444,6 @@ func (s *Service) getRailDetailInfo(ctx context.Context, railID *big.Int) (*rail
 	}, nil
 }
 
-// calculateRailStatus computes the derived values for a rail including actual settleable amounts
-func (s *Service) calculateRailStatus(ctx context.Context, rail *railDetailInfo, railId *big.Int, isTerminated bool, currentEpoch, lockupLastSettledAt *big.Int) *types.RailStatus {
-	var unsettledEpochs, settleableEpochs *big.Int
-
-	// Determine the settlement cap epoch
-	var capEpoch *big.Int
-	if isTerminated && rail.EndEpoch != nil && rail.EndEpoch.Cmp(big.NewInt(0)) > 0 {
-		// Terminated rail - unsettled is up to endEpoch
-		unsettledEpochs = new(big.Int).Sub(rail.EndEpoch, rail.SettledUpTo)
-		// For terminated rails, streaming lockup covers all remaining epochs
-		settleableEpochs = new(big.Int).Set(unsettledEpochs)
-		capEpoch = rail.EndEpoch
-	} else {
-		// Non-terminated rail
-		unsettledEpochs = new(big.Int).Sub(currentEpoch, rail.SettledUpTo)
-
-		// Settleable is capped by lockupLastSettledAt
-		capEpoch = new(big.Int).Set(currentEpoch)
-		if lockupLastSettledAt.Cmp(currentEpoch) < 0 {
-			capEpoch = lockupLastSettledAt
-		}
-		settleableEpochs = new(big.Int).Sub(capEpoch, rail.SettledUpTo)
-	}
-
-	// Clamp to zero if negative
-	if unsettledEpochs.Sign() < 0 {
-		unsettledEpochs = big.NewInt(0)
-	}
-	if settleableEpochs.Sign() < 0 {
-		settleableEpochs = big.NewInt(0)
-	}
-
-	// Calculate theoretical amounts (assuming 100% proofs)
-	unsettledAmount := new(big.Int).Mul(unsettledEpochs, rail.PaymentRate)
-	settleableAmount := new(big.Int).Mul(settleableEpochs, rail.PaymentRate)
-
-	// Determine if rail has a validator
-	hasValidator := rail.Validator != (common.Address{})
-
-	status := &types.RailStatus{
-		RailId:            railId,
-		PaymentRate:       rail.PaymentRate,
-		SettledUpTo:       rail.SettledUpTo,
-		LockupPeriod:      rail.LockupPeriod,
-		LockupFixed:       rail.LockupFixed,
-		IsTerminated:      isTerminated,
-		EndEpoch:          rail.EndEpoch,
-		Operator:          rail.Operator,
-		Validator:         rail.Validator,
-		CommissionRateBps: rail.CommissionRateBps,
-		UnsettledEpochs:   unsettledEpochs,
-		UnsettledAmount:   unsettledAmount,
-		SettleableEpochs:  settleableEpochs,
-		SettleableAmount:  settleableAmount,
-		HasValidator:      hasValidator,
-	}
-
-	// If no validator, actual = theoretical (CDN rails pay fully)
-	if !hasValidator {
-		status.ProvenEpochs = new(big.Int).Set(settleableEpochs)
-		status.ActualSettleable = new(big.Int).Set(settleableAmount)
-		status.ProofSuccessRate = 1.0
-		return status
-	}
-
-	// Query proving state
-	provingState, err := s.getRailProvingState(ctx, railId)
-	if err != nil {
-		log.Warnw("failed to get proving state, falling back to theoretical", "railId", railId, "error", err)
-		status.ProvenEpochs = new(big.Int).Set(settleableEpochs)
-		status.ActualSettleable = new(big.Int).Set(settleableAmount)
-		status.ProofSuccessRate = 1.0
-		return status
-	}
-
-	if !provingState.HasValidator {
-		// Rail not registered with service contract
-		status.ProvenEpochs = new(big.Int).Set(settleableEpochs)
-		status.ActualSettleable = new(big.Int).Set(settleableAmount)
-		status.ProofSuccessRate = 1.0
-		return status
-	}
-
-	// Count proven epochs
-	provenEpochs, err := s.countProvenEpochs(ctx, provingState, rail.SettledUpTo, capEpoch)
-	if err != nil {
-		log.Warnw("failed to count proven epochs, falling back to theoretical", "railId", railId, "error", err)
-		status.ProvenEpochs = new(big.Int).Set(settleableEpochs)
-		status.ActualSettleable = new(big.Int).Set(settleableAmount)
-		status.ProofSuccessRate = 1.0
-		return status
-	}
-
-	// Cap by settleable (lockup constraint still applies)
-	if provenEpochs.Cmp(settleableEpochs) > 0 {
-		provenEpochs = new(big.Int).Set(settleableEpochs)
-	}
-
-	status.ProvenEpochs = provenEpochs
-	status.ActualSettleable = new(big.Int).Mul(provenEpochs, rail.PaymentRate)
-
-	// Calculate success rate
-	if settleableEpochs.Sign() > 0 {
-		provenF := new(big.Float).SetInt(provenEpochs)
-		settleableF := new(big.Float).SetInt(settleableEpochs)
-		rateF := new(big.Float).Quo(provenF, settleableF)
-		status.ProofSuccessRate, _ = rateF.Float64()
-	} else {
-		status.ProofSuccessRate = 1.0
-	}
-
-	return status
-}
-
 // calculateRailStatusFast computes rail status using pre-fetched proving data (no extra RPC calls)
 func (s *Service) calculateRailStatusFast(ctx context.Context, rail *railDetailInfo, railId *big.Int, isTerminated bool,
 	currentEpoch, lockupLastSettledAt, dataSetId, activationEpoch *big.Int, maxProvingPeriod uint64) *types.RailStatus {
@@ -731,41 +612,6 @@ type railProvingState struct {
 	HasValidator     bool // false if dataSetId == 0
 }
 
-// getRailProvingState fetches proving state for a rail
-func (s *Service) getRailProvingState(ctx context.Context, railId *big.Int) (*railProvingState, error) {
-	bindCtx := &bind.CallOpts{Context: ctx}
-
-	// 1. railToDataSet(railId) -> dataSetId
-	dataSetId, err := s.ServiceViewContract.RailToDataSet(bindCtx, railId)
-	if err != nil {
-		return nil, fmt.Errorf("querying rail to dataset mapping: %w", err)
-	}
-
-	// If dataSetId == 0, rail has no validator
-	if dataSetId.Cmp(big.NewInt(0)) == 0 {
-		return &railProvingState{HasValidator: false}, nil
-	}
-
-	// 2. provingActivationEpoch(dataSetId)
-	activationEpoch, err := s.ServiceViewContract.ProvingActivationEpoch(bindCtx, dataSetId)
-	if err != nil {
-		return nil, fmt.Errorf("querying proving activation epoch: %w", err)
-	}
-
-	// 3. getPDPConfig()
-	pdpConfig, err := s.ServiceViewContract.GetPDPConfig(bindCtx)
-	if err != nil {
-		return nil, fmt.Errorf("querying max proving period: %w", err)
-	}
-
-	return &railProvingState{
-		DataSetId:        dataSetId,
-		ActivationEpoch:  activationEpoch,
-		MaxProvingPeriod: pdpConfig.MaxProvingPeriod,
-		HasValidator:     true,
-	}, nil
-}
-
 // calculateProvenPeriodsSlot computes storage slot for provenPeriods[dataSetId][bucketId]
 // Formula: keccak256(bucketId . keccak256(dataSetId . baseSlot))
 func calculateProvenPeriodsSlot(dataSetId *big.Int, bucketId uint64) [32]byte {
@@ -803,7 +649,7 @@ func (s *Service) countProvenEpochs(
 	ctx context.Context,
 	state *railProvingState,
 	fromEpoch *big.Int, // settledUpTo (exclusive start)
-	toEpoch *big.Int,   // currentEpoch (inclusive end)
+	toEpoch *big.Int, // currentEpoch (inclusive end)
 ) (*big.Int, error) {
 	fromEpochU := fromEpoch.Uint64()
 	toEpochU := toEpoch.Uint64()
