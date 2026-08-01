@@ -10,18 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     environment: mainnet
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Cache forgectl binary
         id: cache-binary
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: forgectl
           key: forgectl-${{ runner.os }}-${{ hashFiles('**/*.go', 'go.sum') }}
 
       - name: Setup Go
         if: steps.cache-binary.outputs.cache-hit != 'true'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v7
         with:
           go-version-file: 'go.mod'
 
