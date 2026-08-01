@@ -9,8 +9,8 @@ import (
 	"github.com/fil-forge/forgectl/cli/printer"
 	"github.com/fil-forge/forgectl/pkg/services/inspector"
 
-	"github.com/spf13/cobra"
 	"github.com/fil-forge/forgectl/cli/config"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -128,9 +128,10 @@ func ParseSize(sizeStr string) (*big.Int, error) {
 // based on the dataset size and lockup parameters.
 //
 // Formula from https://filecoinproject.slack.com/archives/C07CGTXHHT4/p1759276539956319
-//   rateAllowance = (sizeInBytes × pricePerTiBPerMonth) / (TiB_IN_BYTES × epochsPerMonth)
-//   lockupAllowance = ratePerEpoch × lockupPeriodInEpochs
-//   maxLockupPeriod = maxLockupPeriodDays × EpochsPerDay
+//
+//	rateAllowance = (sizeInBytes × pricePerTiBPerMonth) / (TiB_IN_BYTES × epochsPerMonth)
+//	lockupAllowance = ratePerEpoch × lockupPeriodInEpochs
+//	maxLockupPeriod = maxLockupPeriodDays × EpochsPerDay
 //
 // Parameters:
 //   - sizeInBytes: The dataset size in bytes

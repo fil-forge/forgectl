@@ -5,11 +5,11 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/fil-forge/forgectl/cli/cmd/metrics"
 	"github.com/fil-forge/forgectl/cli/cmd/payments"
 	"github.com/fil-forge/forgectl/cli/cmd/providers"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var cfgFile string
