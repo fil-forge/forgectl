@@ -11,7 +11,7 @@ require (
 	github.com/ethereum/go-ethereum v1.16.5
 	github.com/fil-forge/filecoin-services/go v0.0.0-20260507172456-36ebe4467390
 	github.com/ipfs/go-log/v2 v2.8.2
-	github.com/spf13/cobra v1.8.1
+	github.com/spf13/cobra v1.10.2
 	github.com/spf13/viper v1.21.0
 	go.opentelemetry.io/otel v1.39.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v1.39.0
